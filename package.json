@@ -1,0 +1,17 @@
+{
+  "name": "eeg",
+  "version": "0.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "binaryjs": "~0.1.4",
+    "express": "~3.0.4",
+    "serialport": "~1.0.8",
+    "ws": "~0.4.23"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "license": "BSD"
+}

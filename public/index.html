@@ -1,0 +1,84 @@
+<!DOCTYPE HTML> 
+<html lang="en"> 
+<head> 
+<title>EEG for EE40</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+<meta http-equiv="Content-Language" content="en-us"> 
+
+<link href="/css/style.css" rel="stylesheet" type="text/css"> 
+<script type="text/javascript" src="/js/jquery.min.js"></script>  
+<script type="text/javascript" src="/js/binary.min.js"></script>  
+<script type="text/javascript" src="/js/smoothie.js"></script>  
+<script type="text/javascript">
+var client = new BinaryClient('ws://localhost:9000');
+var max = 0;
+var min = 0;
+$(document).ready(function(){
+  bottom = document.getElementById('bottom');
+  canvas = document.getElementById('mycanvas');
+  canvas2 = document.getElementById('mycanvas2');
+  // resize the canvas to fill browser window dynamically
+  window.addEventListener('resize', resizeCanvas, false);
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight/2;
+    canvas2.width = window.innerWidth;
+    canvas2.height = window.innerHeight/2 - 25;
+  }
+  resizeCanvas();
+
+  var smoothie2 = new SmoothieChart({
+    grid: { strokeStyle:'rgb(125, 0, 0)', fillStyle:'rgb(60, 0, 0)',
+            lineWidth: 1, millisPerLine: 5000, verticalSections: 4, },
+    labels: { fillStyle:'rgb(255, 255, 0)' },
+    timestampFormatter: SmoothieChart.timeFormatter
+  });
+  smoothie2.streamTo(canvas2);
+  
+  
+  var smoothie = new SmoothieChart({
+    grid: { strokeStyle:'rgb(125, 0, 0)', fillStyle:'rgb(60, 0, 0)',
+            lineWidth: 1, millisPerLine: 5000, verticalSections: 4, },
+    labels: { fillStyle:'rgb(255, 255, 0)' }
+    
+  });
+  smoothie.streamTo(canvas);
+  // Data
+  var line1 = new TimeSeries();
+
+  // Add to SmoothieChart
+  smoothie.addTimeSeries(line1, { strokeStyle:'rgba(0, 255, 0, 0.8)', lineWidth: 3 });
+  client.on('stream', function(stream){
+    stream.on('data', function(data){
+      min = Math.min(min, data);
+      max = Math.max(max, data);
+      line1.append(new Date().getTime(), data);
+      line2.append(new Date().getTime(), max - min);
+    });
+  });
+  
+  var x = false;
+  setInterval(function(){
+    if (x) {
+      max = 0;
+    } else {
+      min = 0;
+    }
+    x = !x;
+  }, 500);
+  
+  var line2 = new TimeSeries();
+
+  // Add to SmoothieChart
+  smoothie2.addTimeSeries(line2, { strokeStyle:'rgba(0, 255, 0, 0.8)', lineWidth: 3 });
+});
+
+</script>
+</head> 
+ 
+<body> 
+<canvas id="mycanvas" width="1024" height="200"></canvas>
+<canvas id="mycanvas2" width="1024" height="200"></canvas>
+</body> 
+</html> 
